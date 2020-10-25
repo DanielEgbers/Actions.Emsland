@@ -20,7 +20,7 @@ return await InvokeCommandAsync(Args.ToArray());
 
 private async Task<int> InvokeCommandAsync(string[] args)
 {
-    const string FeedFilePath = "data/feed.xml";
+    const string FeedFilePath = "data/Geeste.xml";
 
     var scrape = new Command("scrape")
     {
