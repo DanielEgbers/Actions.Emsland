@@ -1,0 +1,37 @@
+name: scrape latest data
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/25 3-18 * * 1-5'
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+    - name: checkout scripts
+      uses: actions/checkout@v2
+      with:
+        path: scripts
+    - name: checkout data
+      env:
+        DATA_REPO: ${{ secrets.DATA_REPO }}
+      run: |-
+        git clone $DATA_REPO data
+    - name: setup
+      run: |-
+        dotnet tool update --global dotnet-script
+        dotnet script --info
+    - name: prepare
+      run: |-
+        dotnet script --debug scripts/actions.csx -- --help
+    - name: scrape
+      run: |-
+        dotnet script scripts/actions.csx scrape
+    - name: push
+      run: |-
+        dotnet script scripts/actions.csx push
