@@ -89,7 +89,7 @@ private async Task UpdateFeedAsync(string file)
             {
                 Link = (element.SelectSingleNode("./a") as IElement)?.GetAttribute("href"),
                 Title = element.SelectSingleNode("./h2")?.TextContent.Trim(),
-                Description = element.SelectSingleNode("./p")?.TextContent.Trim(),
+                Description = element.SelectSingleNode("./p")?.TextContent.Trim() + "...",
                 Image = (element.SelectSingleNode(".//img") as IElement)?.GetAttribute("src"),
                 Published = DateTime.ParseExact(element.SelectSingleNode("./text()")?.TextContent ?? string.Empty, format: "dd.MM.yyyy", provider: CultureInfo.InvariantCulture)
             };
