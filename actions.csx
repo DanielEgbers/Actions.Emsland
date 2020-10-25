@@ -124,35 +124,6 @@ private async Task UpdateFeedAsync(string file)
     File.WriteAllText(file, feed);
 }
 
-private async IAsyncEnumerable<ISyndicationItem> ReadFeedItemsAsync(string feedXml)
-{
-    async Task<bool> ReadAsync(RssFeedReader reader)
-    {
-        try
-        {
-            return await reader.Read();
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    using (var stringReader = new StringReader(feedXml))
-    {
-        using (var xmlReader = XmlReader.Create(stringReader, new XmlReaderSettings() { Async = true }))
-        {
-            var feedReader = new RssFeedReader(xmlReader);
-            
-            while (await ReadAsync(feedReader))
-            {
-                if (feedReader.ElementType == SyndicationElementType.Item)
-                    yield return await feedReader.ReadItem();
-            }
-        }
-    }
-}
-
 private async Task<string> WriteFeedAsync(string title, string description, string link, IEnumerable<ISyndicationItem> items)
 {
     using (var stringWriter = new StringWriterWithEncoding(Encoding.UTF8))
