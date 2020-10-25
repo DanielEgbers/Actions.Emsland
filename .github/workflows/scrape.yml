@@ -17,6 +17,11 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: scripts
+    - name: checkout shared
+      uses: actions/checkout@v2
+      with:
+        repository: DanielEgbers/Actions.Shared
+        path: Actions.Shared
     - name: checkout data
       env:
         DATA_REPO: ${{ secrets.DATA_REPO }}
