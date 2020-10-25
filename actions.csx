@@ -13,6 +13,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Xml;
 using System.Xml.Linq;
+using System.Globalization;
 using Flurl.Http;
 using Microsoft.SyndicationFeed;
 using Microsoft.SyndicationFeed.Rss;
@@ -96,7 +97,7 @@ private async Task UpdateFeedAsync(string file)
                 Id = BaseUrl + "/" + (element.SelectSingleNode("./a") as IElement)?.GetAttribute("href") ?? string.Empty,
                 Title = element.SelectSingleNode("./h2").TextContent.Trim(),
                 Description = element.SelectSingleNode("./p").TextContent.Trim(),
-                Published = DateTime.Parse(element.SelectSingleNode("./text()").TextContent)
+                Published = DateTime.ParseExact(element.SelectSingleNode("./text()").TextContent, format: "dd.MM.yyyy", provider: CultureInfo.InvariantCulture)
             };
             item.AddLink(new SyndicationLink(new Uri(item.Id)));
 
