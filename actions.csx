@@ -25,9 +25,6 @@ private async Task<int> InvokeCommandAsync(string[] args)
     const string WasLosInFeedFilePath = "data/WasLosIn.xml";
     const string GeesteFeedFilePath = "data/Geeste.xml";
 
-    var commitHash = Environment.GetEnvironmentVariable("GITHUB_SHA")?.Substring(0, 7);
-    Console.WriteLine($"CommitHash: {commitHash}");
-
     var scrapeWasLosIn = new Command("WasLosIn")
     {
         Handler = CommandHandler.Create(async () =>
