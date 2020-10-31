@@ -2,7 +2,7 @@
 #r "nuget: Flurl.Http, 2.4.2"
 #r "nuget: AngleSharp, 0.14.0"
 #r "nuget: AngleSharp.XPath, 1.1.7"
-#r "nuget: SmartReader, 0.7.4"
+#r "nuget: SmartReader, 0.7.5"
 
 #load "../Actions.Shared/git.csx"
 #load "../Actions.Shared/feed.csx"
@@ -211,16 +211,6 @@ private async Task UpdateGeesteFeedAsync(string file)
                 continue;
 
             var reader = new Reader(link, articleHtml);
-
-            reader.AddCustomOperationStart(e =>
-            {
-                var elements = new List<IElement>();
-
-                elements.AddRange(e.QuerySelectorAll("h2")); // h2 cause exception in PrepArticle
-
-                foreach (var element in elements)
-                    element.Remove();
-            });
 
             var article = await reader.GetArticleAsync();
 
