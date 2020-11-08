@@ -22,32 +22,43 @@ return await InvokeCommandAsync(Args.ToArray());
 
 private async Task<int> InvokeCommandAsync(string[] args)
 {
+    const string ErrorLogFilePath = "data/.error.log";
+
     const string WasLosInFeedFilePath = "data/WasLosIn.xml";
     const string GeesteFeedFilePath = "data/Geeste.xml";
 
-    var scrapeWasLosIn = new Command("WasLosIn")
+    Command BuildScrapeCommand(string name, Func<Task> action) 
     {
-        Handler = CommandHandler.Create(async () =>
+        return new Command(name)
         {
-            await UpdateWasLosInFeedAsync(WasLosInFeedFilePath);
-        })
-    };
-    var scrapeGeeste = new Command("Geeste")
-    {
-        Handler = CommandHandler.Create(async () =>
-        {
-            await UpdateGeesteFeedAsync(GeesteFeedFilePath);
-        })
-    };
+            Handler = CommandHandler.Create(async () =>
+            {
+                Console.WriteLine(name);
+                try
+                {
+                    await action();
+                }
+                catch (Exception ex)
+                {
+                    var message = $"{ex.GetType().Name}: {ex.Message}";
+                    Console.WriteLine(message);
+                    File.AppendAllText(ErrorLogFilePath, message);
+                }
+            })
+        };
+    }
+
     var scrape = new Command("scrape")
     {
-        scrapeWasLosIn,
-        scrapeGeeste,
+        BuildScrapeCommand("WasLosIn", async () => await UpdateWasLosInFeedAsync(WasLosInFeedFilePath)),
+        BuildScrapeCommand("Geeste", async () => await UpdateGeesteFeedAsync(GeesteFeedFilePath)),
     };
     scrape.Handler = CommandHandler.Create(async () =>
     {
-        await scrapeWasLosIn.InvokeAsync(string.Empty);
-        await scrapeGeeste.InvokeAsync(string.Empty);
+        foreach (var command in scrape.Where(s => s is Command).Cast<Command>())
+        {
+            await command.InvokeAsync(string.Empty);
+        }
     });
 
     var push = new Command("push")
@@ -61,7 +72,7 @@ private async Task<int> InvokeCommandAsync(string[] args)
 
             await Git.ConfigUserAsync(workingDirectory, "GitHub Actions", "actions@users.noreply.github.com");
 
-            if (!await Git.CommitAsync(workingDirectory, "update {files}", Path.GetFileName(WasLosInFeedFilePath), Path.GetFileName(GeesteFeedFilePath)))
+            if (!await Git.CommitAsync(workingDirectory, "update {files}", Path.GetFileName(ErrorLogFilePath), Path.GetFileName(WasLosInFeedFilePath), Path.GetFileName(GeesteFeedFilePath)))
                 return;
 
             await Git.PushAsync(workingDirectory);
