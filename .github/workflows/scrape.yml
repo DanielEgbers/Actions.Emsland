@@ -37,9 +37,9 @@ jobs:
     - name: scrape WasLosIn
       run: |-
         dotnet script scripts/actions.csx scrape WasLosIn
-    - name: scrape Geeste
-      run: |-
-        dotnet script scripts/actions.csx scrape Geeste
+    # - name: scrape Geeste
+    #   run: |-
+    #     dotnet script scripts/actions.csx scrape Geeste
     - name: push
       run: |-
         dotnet script scripts/actions.csx push
