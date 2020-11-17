@@ -59,3 +59,4 @@ jobs:
     - name: debug
       run: |-
         ls -la
+        ls -la .tools
