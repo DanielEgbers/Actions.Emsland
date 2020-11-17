@@ -18,9 +18,7 @@ using AngleSharp.Dom;
 using AngleSharp.XPath;
 using SmartReader;
 
-Console.WriteLine(":D");
-
-// return await InvokeCommandAsync(Args.ToArray());
+return await InvokeCommandAsync(Args.ToArray());
 
 private async Task<int> InvokeCommandAsync(string[] args)
 {

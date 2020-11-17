@@ -56,7 +56,3 @@ jobs:
     - name: push
       run: |-
         .tools/dotnet-script scripts/actions.csx push
-    - name: debug
-      run: |-
-        ls -la
-        ls -la .tools
