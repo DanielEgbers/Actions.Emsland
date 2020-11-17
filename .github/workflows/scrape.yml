@@ -12,6 +12,8 @@ jobs:
     env:
       DOTNET_NOLOGO: true
       DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SCRIPT_CACHE_LOCATION: ${{ github.workspace }}/.cache
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
     - name: checkout scripts
       uses: actions/checkout@v2
@@ -27,19 +29,33 @@ jobs:
         DATA_REPO: ${{ secrets.DATA_REPO }}
       run: |-
         git clone $DATA_REPO data
-    - name: setup
+    - name: restore tools
+      id: restore-tools
+      uses: actions/cache@v2
+      with:
+        path: .tools
+        key: tools-${{ runner.os }}-${{ hashFiles('.tools/dotnet-script') }}
+    - name: install tools
+      if: steps.restore-tools.outputs.cache-hit != 'true'
       run: |-
-        dotnet tool update --global dotnet-script
-        dotnet script --info
+        dotnet tool install --tool-path .tools dotnet-script
+    - name: restore packages
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.NUGET_PACKAGES }}
+        key: packages-${{ runner.os }}-${{ github.sha }}
     - name: prepare
       run: |-
-        dotnet script --debug scripts/actions.csx -- --help
+        .tools/dotnet-script --debug scripts/actions.csx -- --help
     - name: scrape WasLosIn
       run: |-
-        dotnet script scripts/actions.csx scrape WasLosIn
+        .tools/dotnet-script scripts/actions.csx scrape WasLosIn
     # - name: scrape Geeste
     #   run: |-
-    #     dotnet script scripts/actions.csx scrape Geeste
+    #     .tools/dotnet-script scripts/actions.csx scrape Geeste
     - name: push
       run: |-
-        dotnet script scripts/actions.csx push
+        .tools/dotnet-script scripts/actions.csx push
+    - name: debug
+      run: |-
+        ls -la
