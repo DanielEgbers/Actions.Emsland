@@ -33,17 +33,19 @@ jobs:
       id: restore-tools
       uses: actions/cache@v2
       with:
+        key: tools
         path: .tools
-        key: tools-${{ runner.os }}-${{ hashFiles('.tools/dotnet-script') }}
     - name: install tools
-      if: steps.restore-tools.outputs.cache-hit != 'true'
+      if: github.event_name != 'schedule' || steps.restore-tools.outputs.cache-hit != 'true'
       run: |-
-        dotnet tool install --tool-path .tools dotnet-script
-    - name: restore packages
+        dotnet tool update --tool-path .tools dotnet-script
+    - name: restore cache
       uses: actions/cache@v2
       with:
-        path: ${{ env.NUGET_PACKAGES }}
-        key: packages-${{ runner.os }}-${{ github.sha }}
+        key: packages-${{ github.sha }}
+        path: |
+          ${{ env.NUGET_PACKAGES }}
+          ${{ env.DOTNET_SCRIPT_CACHE_LOCATION }}
     - name: prepare
       run: |-
         .tools/dotnet-script --debug scripts/actions.csx -- --help
