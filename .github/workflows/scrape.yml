@@ -28,7 +28,7 @@ jobs:
       env:
         DATA_REPO: ${{ secrets.DATA_REPO }}
       run: |-
-        git clone $DATA_REPO data
+        git clone --depth 1 $DATA_REPO data
     - name: restore tools
       id: restore-tools
       uses: actions/cache@v2
