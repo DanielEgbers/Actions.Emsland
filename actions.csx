@@ -65,10 +65,10 @@ private async Task<int> InvokeCommandAsync(string[] args)
     {
         Handler = CommandHandler.Create(async () =>
         {
-            if (Debugger.IsAttached)
-                return;
-
             var dataPath = Path.GetDirectoryName(WasLosInFeedFilePath)!;
+
+            if (!Git.IsRootDirectory(workingDirectory: dataPath))
+                return;
 
             if (!(await Git.GetChangesAsync(workingDirectory: dataPath)).Any())
                 return;
