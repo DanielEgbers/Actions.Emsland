@@ -40,7 +40,7 @@ private async Task<int> InvokeCommandAsync(string[] args)
                 }
                 catch (Exception ex)
                 {
-                    var message = $"{ex.GetType().Name}: {ex.Message}";
+                    var message = $"{ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}";
                     Console.WriteLine(message);
                     File.AppendAllText(ErrorLogFilePath, message);
                 }
