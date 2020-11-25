@@ -102,7 +102,7 @@ private async Task UpdateWasLosInFeedAsync(string file)
 {
     const int ItemLimit = 25;
 
-    var uri = new Uri($"https://www.waslosin.de/feed");
+    var uri = new Uri($"https://www.waslosin.de/category/lingen,meppen/feed");
 
     var baseUrl = uri.GetLeftPart(System.UriPartial.Authority);
 
@@ -126,15 +126,34 @@ private async Task UpdateWasLosInFeedAsync(string file)
     {
         if (newItems.Count >= ItemLimit)
             break;
+    
+        var link = itemLink;
 
-        var reader = new Reader(itemLink);
+        if (string.IsNullOrWhiteSpace(link))
+            continue;
+
+        if (!link.StartsWith(baseUrl))
+            link = Flurl.Url.Combine(baseUrl, link);
+
+        if (existingItems.Any(i => i.Link == link))
+            continue;
+
+        var articleHtml = await link.GetStringAsync();
+
+        if (string.IsNullOrWhiteSpace(articleHtml))
+            continue;
+
+        var reader = new Reader(link, articleHtml);
 
         reader.AddCustomOperationStart(e =>
         {
             var elements = new List<IElement>();
 
             elements.AddRange(e.QuerySelectorAll(".obi_random_banners_posts")); // ads
-            elements.AddRange(e.QuerySelectorAll("#mvp-content-bot")); // author
+            elements.AddRange(e.QuerySelectorAll(".mvp-author-info-wrap")); // author header
+            elements.AddRange(e.QuerySelectorAll("#mvp-content-bot")); // author footer
+            elements.AddRange(e.QuerySelectorAll(".mvp-feat-caption")); // image comment
+            elements.AddRange(e.QuerySelectorAll("#comments")); // comments
 
             foreach (var element in elements)
                 element.Remove();
@@ -161,8 +180,8 @@ private async Task UpdateWasLosInFeedAsync(string file)
     (
         channel: new FeedChannel()
         {
-            Title = "Was Los In",
-            Description = "Lingen, Meppen, Papenburg & Nordhorn",
+            Title = "Lingen & Meppen - Was Los In",
+            Description = "Lingen & Meppen - Was Los In",
             Link = new Uri(baseUrl),
         },
         items: newItems.Concat(existingItems).Take(ItemLimit)
